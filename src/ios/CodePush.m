@@ -1,5 +1,6 @@
 #import <Cordova/CDV.h>
 #import <Cordova/CDVConfigParser.h>
+#import <Cordova/CDVWebViewEngineProtocol.h>
 #import "CodePush.h"
 #import "CodePushPackageMetadata.h"
 #import "CodePushPackageManager.h"
@@ -13,6 +14,7 @@
 
 @implementation CodePush
 
+static NSString *specifiedServerPath = @"";
 bool didUpdate = false;
 bool pendingInstall = false;
 NSDate* lastResignedDate;
@@ -127,7 +129,7 @@ StatusReport* rollbackStatusReport = nil;
             CodePushPackageMetadata* currentMetadata = [CodePushPackageManager getCurrentPackageMetadata];
             bool revertSuccess = (nil != currentMetadata && [self loadPackage:currentMetadata.localPath]);
             if (!revertSuccess) {
-                /* first update failed, go back to store version */
+                /* first update failed, go back to binary version */
                 [self loadStoreVersion];
             }
         }
@@ -137,7 +139,7 @@ StatusReport* rollbackStatusReport = nil;
 - (void)notifyApplicationReady:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
         if ([CodePushPackageManager isBinaryFirstRun]) {
-            // Report first run of a store version app
+            // Report first run of a binary version app
             [CodePushPackageManager markBinaryFirstRunFlag];
             NSString* appVersion = [Utilities getApplicationVersion];
             NSString* deploymentKey = ((CDVViewController *)self.viewController).settings[DeploymentKeyPreference];
@@ -410,18 +412,35 @@ StatusReport* rollbackStatusReport = nil;
 #endif
 }
 
+<<<<<<< HEAD
 - (Boolean) hasIonicWebViewEngine {
     NSString * webViewEngineClass = NSStringFromClass([self.webViewEngine class]);
     SEL setServerBasePath = NSSelectorFromString(@"setServerBasePath:");
     if ([webViewEngineClass  isEqual: @"CDVWKWebViewEngine"] && [self.webViewEngine respondsToSelector:setServerBasePath]) {
+=======
++ (Boolean) hasIonicWebViewEngine:(id<CDVWebViewEngineProtocol>) webViewEngine {
+    NSString * webViewEngineClass = NSStringFromClass([webViewEngine class]);
+    SEL setServerBasePath = NSSelectorFromString(@"setServerBasePath:");
+    if ([webViewEngineClass  isEqual: @"CDVWKWebViewEngine"] && [webViewEngine respondsToSelector:setServerBasePath]) {
+>>>>>>> a08146eac96772e9f40fdd8730584658874e85cd
         return true;
     } else {
         return false;
     }
 }
 
+<<<<<<< HEAD
 - (void) setServerBasePath:(NSString*)serverPath {
     if ([self hasIonicWebViewEngine]) {
+=======
++ (NSString*) getCurrentServerBasePath {
+    return specifiedServerPath;
+}
+
++ (void) setServerBasePath:(NSString*)serverPath webView:(id<CDVWebViewEngineProtocol>) webViewEngine {
+    if ([CodePush hasIonicWebViewEngine: webViewEngine]) {
+        specifiedServerPath = serverPath;
+>>>>>>> a08146eac96772e9f40fdd8730584658874e85cd
         SEL setServerBasePath = NSSelectorFromString(@"setServerBasePath:");
         NSMutableArray * urlPathComponents = [serverPath pathComponents].mutableCopy;
         [urlPathComponents removeLastObject];
@@ -430,7 +449,11 @@ StatusReport* rollbackStatusReport = nil;
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         CDVInvokedUrlCommand * command = [CDVInvokedUrlCommand commandFromJson:[NSArray arrayWithObjects: @"", @"", @"", [NSMutableArray arrayWithObject:serverBasePath], nil]];
         dispatch_async(dispatch_get_main_queue(), ^{
+<<<<<<< HEAD
             [self.webViewEngine performSelector: setServerBasePath withObject: command];
+=======
+            [webViewEngine performSelector: setServerBasePath withObject: command];
+>>>>>>> a08146eac96772e9f40fdd8730584658874e85cd
         });
 #pragma clang diagnostic pop
     }
@@ -483,8 +506,13 @@ StatusReport* rollbackStatusReport = nil;
 - (void)redirectStartPageToURL:(NSString*)packageLocation{
     NSURL* URL = [self getStartPageURLForLocalPackage:packageLocation];
     if (URL) {
+<<<<<<< HEAD
         if ([self hasIonicWebViewEngine]) {
             [self setServerBasePath:URL.path];
+=======
+        if ([CodePush hasIonicWebViewEngine: self.webViewEngine]) {
+            [CodePush setServerBasePath:URL.path webView:self.webViewEngine];
+>>>>>>> a08146eac96772e9f40fdd8730584658874e85cd
         } else {
             ((CDVViewController *)self.viewController).startPage = [URL absoluteString];
         }

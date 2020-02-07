@@ -227,7 +227,7 @@ public class CodePush extends CordovaPlugin {
 
     private boolean execNotifyApplicationReady(CallbackContext callbackContext) {
         if (this.codePushPackageManager.isBinaryFirstRun()) {
-            // Report first run of a store version app
+            // Report first run of a binary version app
             this.codePushPackageManager.saveBinaryFirstRunFlag();
             try {
                 String appVersion = Utilities.getAppVersionName(cordova.getActivity());
@@ -525,7 +525,11 @@ public class CodePush extends CordovaPlugin {
             if (this.hasIonicWebViewEngine()) {
                 try {
                     String ionicWebViewEngineUrlPath = new URI(url).getPath();
+<<<<<<< HEAD
                     String ionicWebViewEngineServerPath = ionicWebViewEngineUrlPath.substring(0, ionicWebViewEngineUrlPath.indexOf("/index.html"));
+=======
+                    String ionicWebViewEngineServerPath = ionicWebViewEngineUrlPath.substring(0, ionicWebViewEngineUrlPath.indexOf("/" + getConfigStartPageName()));
+>>>>>>> a08146eac96772e9f40fdd8730584658874e85cd
                     this.setServerBasePath(ionicWebViewEngineServerPath);
                 } catch (URISyntaxException e) {
                     Utilities.logException(e);
